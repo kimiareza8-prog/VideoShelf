@@ -1,0 +1,34 @@
+name: Export upstream flask-cloudflared
+
+on:
+  push:
+    paths:
+      - ".github/workflows/export-upstream-flask-cloudflared.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout upstream repository
+        uses: actions/checkout@v4
+        with:
+          repository: UWUplus/flask-cloudflared
+          ref: main
+          path: flask-cloudflared
+          fetch-depth: 1
+
+      - name: Remove Git metadata
+        run: rm -rf flask-cloudflared/.git
+
+      - name: Upload exact working tree
+        uses: actions/upload-artifact@v4
+        with:
+          name: UWUplus-flask-cloudflared-main
+          path: flask-cloudflared
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1

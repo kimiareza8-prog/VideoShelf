@@ -1,0 +1,29 @@
+name: Fetch cloudflared binary
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fetch-cloudflared.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download official cloudflared 2026.9.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL --retry 5 --retry-delay 2             "https://github.com/cloudflare/cloudflared/releases/download/2026.9.1/cloudflared-windows-amd64.exe"             -o cloudflared.exe
+          echo "2837888cc0f5d58f15b6dc478376de90b4d3ba5241c7947455d1e0a0df429712  cloudflared.exe" | sha256sum -c -
+
+      - name: Upload verified binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflared-windows-amd64-2026.9.1
+          path: cloudflared.exe
+          if-no-files-found: error
+          retention-days: 1

@@ -1,0 +1,34 @@
+name: Fetch official Psiphon Windows from Amazon S3
+
+on:
+  push:
+    paths:
+      - ".github/workflows/fetch-psiphon-s3.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Psiphon from official Amazon S3 mirror
+        run: |
+          set -euxo pipefail
+          curl -fL --retry 4 --retry-delay 2             "https://s3.amazonaws.com/e8uh-puy4-4hx1/psiphon3.exe"             -o psiphon3-amazon-s3.exe
+          curl -fL --retry 4 --retry-delay 2             "https://www.psiphon.ca/psiphon3.exe"             -o psiphon3-official.exe
+          echo "Amazon S3:"
+          sha256sum psiphon3-amazon-s3.exe
+          echo "Psiphon.ca:"
+          sha256sum psiphon3-official.exe
+          cmp -s psiphon3-amazon-s3.exe psiphon3-official.exe && echo "FILES_IDENTICAL=YES" || echo "FILES_IDENTICAL=NO"
+          file psiphon3-amazon-s3.exe
+
+      - name: Upload Amazon S3 Psiphon
+        uses: actions/upload-artifact@v4
+        with:
+          name: psiphon3-amazon-s3
+          path: psiphon3-amazon-s3.exe
+          if-no-files-found: error
+          retention-days: 1
